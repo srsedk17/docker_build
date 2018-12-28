@@ -1,0 +1,26 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "browse_redirect"
+services:
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-browse-redirect-service"
+    image_version: "{{ browse_redirect_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name}}"
+      - "CATALINA_PARAMS={{ browse_redirect_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ browse_redirect_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ browse_redirect_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ browse_redirect_CATALINA_OPTS_GC1 }}"
+      - "CATEGORY_HIERARCHY_LOAD_FILE={{ browse_redirect_CATEGORY_HIERARCHY_LOAD_FILE }}"
+      - "COMMIT_SHA={{ browse_redirect_COMMIT_SHA }}"
+    ports:
+      - 8091:8080
+    volumes:
+      - /opt/docker_logs/browseredirect:/opt/mos/logs
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+      - /data/backup:/data/backup:rw
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}"
+

@@ -1,0 +1,4 @@
+[Service]
+{% for var in item.environment %}
+Environment="{{ var }}"
+{% endfor %}

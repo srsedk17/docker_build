@@ -1,0 +1,95 @@
+---
+- name: install service systemd file
+  template:
+    src  : docker.service.j2
+    dest : "/etc/systemd/system/{{ item.name }}.service"
+    owner: root
+    group: root
+    mode : 0644
+  with_items:
+    - "{{ services }}"
+  register: restart_systemd
+  notify:
+    - restart docker service
+
+- name: install service timer file
+  template:
+    src  : batch.timer.j2
+    dest : "/etc/systemd/system/{{ item.name }}.timer"
+    owner: root
+    group: root
+    mode : 0644
+  with_items:
+    - "{{ services }}"
+    - skip_missing: True
+  when:
+    - item.schedule is defined
+  register: restart_timer
+  notify:
+    - restart timer service
+
+- name: create service.d directory
+  file:
+    path : "/etc/systemd/system/{{ item.name }}.service.d"
+    owner: root
+    group: root
+    mode : 0644
+    state: directory
+  with_items:
+    - "{{ services }}"
+
+- name: install service systemd override file
+  template:
+    src  : override.conf.j2
+    dest : "/etc/systemd/system/{{ item.name }}.service.d/override.conf"
+    owner: root
+    group: root
+    mode : 0644
+  with_items:
+    - "{{ services }}"
+  when:
+    - item.environment is defined
+  register: restart_override
+  notify:
+    - restart docker service
+
+- name: install service start script
+  template:
+    src : start_service.sh.j2
+    dest: "/usr/local/bin/start_{{ item.name }}.sh"
+    mode: 0755
+  with_items:
+    - "{{ services }}"
+  register: restart_script
+  notify:
+    - restart docker service
+
+- name: create docker network
+  docker_network:
+    name : "{{ item.1 }}"
+    state: present
+  with_subelements:
+    - "{{ services }}"
+    - networks
+    - skip_missing: True
+
+- name: determine changed services
+  set_fact:
+    systemd_services : "{{ restart_systemd.results | selectattr('changed') | map(attribute='item.name') | list | unique }}"
+    timer_services   : "{{ restart_timer.results | selectattr('changed') | map(attribute='item.name') | list | unique }}"
+    override_services: "{{ restart_override.results | selectattr('changed') | map(attribute='item.name') | list | unique }}"
+    script_services  : "{{ restart_script.results | selectattr('changed') | map(attribute='item.name') | list | unique }}"
+
+- name: service restart list
+  set_fact:
+    restart_services: "{{ systemd_services + override_services + script_services }}"
+
+- name: ensure services running
+  service:
+    name: "{{ item.name }}"
+    enabled: true
+    state: started
+  with_items:
+    - "{{ services }}"
+  when:
+    - item.schedule is not defined

@@ -1,0 +1,8 @@
+init_config:
+
+instances:
+  - offset_threshold: 60 # seconds difference between local clock and NTP server when ntp.in_sync service check becomes CRITICAL; default is 60
+    host: {{ ntp_host }} # set to use an NTP server of your choosing
+    port: 123            # set along with host
+#    version: 3           # to use a specific NTP version
+#    timeout: 5           # seconds to wait for a response from the NTP server; default is 1

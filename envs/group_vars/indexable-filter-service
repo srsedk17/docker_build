@@ -1,0 +1,23 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "indexable_filter_service"
+services:
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-indexable-filter-service"
+    image_version: "{{ indexable_filter_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name }}"
+      - "STATSD_ENABLED={{ indexable_filter_STATSD_ENABLED }}"
+      - "STATSD_HOST=172.17.0.1"
+      - "STATSD_PORT=8125"
+      - "CONFIG_COMMIT_SHA={{ indexable_filter_CONFIG_COMMIT_SHA }}"
+    volumes:
+      - "/opt/sitemap/output:/opt/sitemap/output:rw"
+    ports:
+      - 8087:8080
+      - 9099:9000
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}"
+

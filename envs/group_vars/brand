@@ -1,0 +1,27 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "brand"
+services:
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-brand"
+    image_version: "{{ brand_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name }}"
+      - "CATALINA_PARAMS={{ brand_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ brand_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ brand_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ brand_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ brand_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ brand_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 80:8080
+      - 9000:9000
+    volumes:
+      - /opt/docker_logs/brand:/opt/mos/logs
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+      - docker_brand_nw
+    aliases:
+      - "{{ service_prefix }}"
+

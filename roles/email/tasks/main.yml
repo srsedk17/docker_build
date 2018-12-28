@@ -1,0 +1,12 @@
+---
+- name: Sending an e-mail to C+E Team
+  run_once: true
+  mail:
+    host: mailrelay.ecomp.com
+    to: GConfigurationNEnvironments@rs-components.com
+    from: gitlab-pipeline@rs-components.com
+    subject: "{{ service_prefix }} deployment {{ env_name }}"
+    body: "{{ lookup('template','email.j2') }}"
+#    body: " Version {{ item.image_version }} for {{ item.name }} has been deployed"
+#  with_items:
+#    - "{{ services  }}"

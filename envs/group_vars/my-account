@@ -1,0 +1,12 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "rs-devsecops"
+service_prefix: "my_account"
+services:
+  - name: "{{ service_prefix }}_jwt_auth_server"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-dev/identity-management/jwt-auth-server"
+    image_version: "{{ jwt_auth_server_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name}}"
+      - "VAULT_TOKEN={{ myaccount_vault_token }}"
+    ports:
+      - 8080:8080

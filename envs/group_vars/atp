@@ -1,0 +1,30 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "atp"
+services:
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-atp"
+    image_version: "{{ atp_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name}}"
+      - "CATALINA_PARAMS={{ atp_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ atp_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ atp_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ atp_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ atp_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ atp_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 80:8080
+    volumes:
+      - /opt/docker_logs/atp:/opt/mos/logs
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+      - docker_atp_nw
+    aliases:
+      - "{{ service_prefix }}"
+    hosts:
+      - "{{ atp_JMOS_HOST }}"
+      - "{{ atp_SAP_HOST }}"
+      - "{{ atp_DB_HOST }}"
+

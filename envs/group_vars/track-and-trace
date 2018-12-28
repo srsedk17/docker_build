@@ -1,0 +1,93 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "area51"
+service_prefix: "track_and_trace"
+services:
+  - name: "{{ service_prefix }}_service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/track-and-trace-service"
+    image_version: "{{ track_and_trace_service_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name | lower }}"
+      - "CATALINA_PARAMS={{ track_and_trace_service_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ track_and_trace_service_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ track_and_trace_service_CATALINA_OPTS_XMX }}"
+      - "SERVER_PORT={{ track_and_trace_service_SERVER_PORT }}"
+      - "MACHINENAME={{ inventory_hostname }}"
+    ports:
+      - 8082:8082
+    volumes:
+      - /opt/docker_logs/trackandtraceservice:/opt/mos/logs:rw
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+      - "docker_orderdetailsservice_nw"
+    aliases:
+      - "trackandtraceservice"
+    ulimits: "nofile=20000:20000"
+    hosts:
+      - "{{ track_and_trace_service_LOADBALANCER_HOST }} "
+      - "{{ track_and_trace_service_TRACKING_HOST }} "
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"track-and-trace\", \"service\": \"track-and-trace-service\"}]"'
+        source: "track-and-trace"
+        service: "track-and-trace-service"
+
+
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/track-and-trace"
+    image_version: "{{ track_and_trace_IMAGE_VERSION }}"
+    environment:
+      - "GRAPHQL_ENDPOINT={{ track_and_trace_GRAPHQL_ENDPOINT }}"
+      - "APAC_MONOLITH_ROOT={{ track_and_trace_APAC_MONOLITH_ROOT }}"
+      - "EMEA_MONOLITH_ROOT={{ track_and_trace_EMEA_MONOLITH_ROOT }}"
+      - "CONFIG_ENV={{ track_and_trace_CONFIG_ENV }}"
+      - "DEBUG={{ track_and_trace_DEBUG }}"
+    ports:
+      - 8081:8081
+    networks:
+      - "{{ service_prefix }}"
+      - "docker_orderdetailsservice_nw"
+    aliases:
+      - "trackandtrace"
+    ulimits: "nofile=20000:20000"
+    hosts:
+      - "{{ track_and_trace_LOADBALANCER_HOST }} "
+      - "{{ track_and_trace_EMEA_HOST }} "
+      - "{{ track_and_trace_APAC_HOST }} "
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"track-and-trace\", \"service\": \"track-and-trace-ui\"}]"'
+        source: "track-and-trace"
+        service: "track-and-trace-ui"
+
+  - name: "{{ service_prefix }}_order_details_service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/order-details-service"
+    image_version: "{{ order_details_service_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name }}"
+      - "CATALINA_OPTS_XMS={{ order_details_service_CATALINA_OPTS_XMS }}"
+      - "SPRING_PROFILES_ACTIVE={{ env_name | lower }}"
+      - "CATALINA_OPTS_XMX={{ order_details_service_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ order_details_service_CATALINA_OPTS_GC1 }}"
+      - "SERVER_PORT={{ order_details_service_SERVER_PORT }}"
+    ports:
+      - 8083:8083
+    volumes:
+      - /opt/docker_logs/orderdetailsservice:/opt/mos/logs:rw
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+      - /opt/docker_secure/orderdetailsservice:/opt/mos/secure:rw
+    networks:
+      - "{{ service_prefix }}"
+      - "docker_orderdetailsservice_nw"
+    aliases:
+      - "orderdetailsservice"
+    ulimits: "nofile=20000:20000"
+    hosts:
+      - "{{ order_details_service_EMEA_DATABASE_HOST }} "
+      - "{{ order_details_service_APAC_DATABASE_HOST }} "
+      - "{{ order_details_service_MIDDLEWARE_HOST }} "
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"track-and-trace\", \"service\": \"track-and-trace-order-details\"}]"'
+        source: "track-and-trace"
+        service: "track-and-trace-order-details"

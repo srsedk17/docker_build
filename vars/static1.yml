@@ -1,0 +1,161 @@
+env_name: "STATIC1"
+ntp_host: "10.248.81.123"
+#Service Name: Brand
+#Repo Name:    ReSTService-Brand
+brand_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+brand_IMAGE_VERSION: "1.0.6"
+brand_CATALINA_OPTS_XMS: "-Xms4096m"
+brand_CATALINA_OPTS_XMX: "-Xmx4096m"
+brand_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+brand_TOMCAT_MINSPARETHREADS: 25
+brand_TOMCAT_MAXTHREADS: 800
+##################################################
+
+#Service Name: ATP
+#Repo Name:    ReSTService-AvailabilityAndFulfilment
+atp_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -DATP_STUBBED_MODE_DELAY=50"
+atp_IMAGE_VERSION: "6.3.19"
+atp_CATALINA_OPTS_XMS: "-Xms4096m"
+atp_CATALINA_OPTS_XMX: "-Xmx12288m"
+atp_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+atp_TOMCAT_MINSPARETHREADS: 25
+atp_TOMCAT_MAXTHREADS: 800
+atp_JMOS_HOST: "ngsp-mo-st1.ebs.ecomp.com:10.249.32.15"
+atp_SAP_HOST: "feai-test-glesb01.ebs.ecomp.com:10.249.32.10"
+atp_DB_HOST: "eclscmdbsn601.ebs.ecomp.com:10.249.65.17"
+#####################################################
+
+#Service Name: Article-hierarchy
+#Repo Name:    ReSTService-ArticleHierarchy
+article_hierarchy_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+article_hierarchy_IMAGE_VERSION: "1.0.20"
+article_hierarchy_CATALINA_OPTS_XMS: "-Xms12288m"
+article_hierarchy_CATALINA_OPTS_XMX: "-Xmx12288m"
+article_hierarchy_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+article_hierarchy_TOMCAT_MINSPARETHREADS: 150
+article_hierarchy_TOMCAT_MAXTHREADS: 800
+#####################################################
+
+#Service Name: Article-restriction
+ar_client_IMAGE_VERSION: "1.20181218121819.5cd5d4b5"
+ar_app_IMAGE_VERSION: "1.20181214103432.9d7d0ec1"
+ar_article_service_IMAGE_VERSION: "1.20181217120443.798f6703"
+ar_rules_service_IMAGE_VERSION: "1.20181217091321.fb52b192"
+ar_customer_service_IMAGE_VERSION: "1.20181214151036.3766e30d"
+ar_hierarchy_service_IMAGE_VERSION: "1.20181217121852.eba06e4b"
+ar_hierarchy_composition_service_IMAGE_VERSION: "1.20181217104449.b73fc074"
+ar_brand_service_IMAGE_VERSION: "1.20181217115210.49ae669c"
+ar_service_IMAGE_VERSION: "1.20181217114347.f5c350a4"
+ar_article_composition_service_IMAGE_VERSION: "1.20181217094538.bee026bf"
+ar_article_restriction_batch_service_IMAGE_VERSION: "1.20181218123507.2f0cc9ef"
+ar_poller_service_IMAGE_VERSION: "1.20181219120239.22ec8e00"
+ar_mongodb_user: "customer-settings-writer"
+ar_mongodb_host: "clusterstatic1-fdvg4.mongodb.net"
+ar_client_security_user: ""
+ar_app_security_user: ""
+ar_article_security_user: "articleuser"
+ar_rules_security_user: "rulesuser"
+ar_customer_security_user: "customeruser"
+ar_hierarchy_security_user: "hierarchyuser"
+ar_hierarchy_composition_security_user: "hierarchycompositionuser"
+ar_brand_security_user: "branduser"
+ar_service_security_user: "restrictionsuser"
+ar_article_composition_security_user: "articlecompositionuser"
+ar_batch_security_user: ""
+ar_logging_json: "true"
+ar_statsd_enabled: "true"
+ar_article_mongodb_user: "article-reader"
+ar_rules_mongodb_user: "rules-writer"
+ar_customer_mongodb_user: "customer-settings-writer"
+ar_hierarchy_mongodb_user: "hierarchy-reader"
+ar_brand_mongodb_user: "brand-reader"
+ar_service_mongodb_user: "restrictions-reader"
+ar_batch_mongodb_user: "batch-writer"
+ar_poller_mongodb_user: "hierarchy-poller-writer"
+ar_hierarchy_poller_mongodb_user: "hierarchy-poller-writer"
+ar_customer_search_endpoint_addr: "http://st1-sii-webservices.ebs.ecomp.com"
+ar_customer_search_endpoint_port: "8881"
+ar_customer_search_endpoint_user: "productrestrictionsapplication_v1_0-user"
+ar_oracle_sb_server: "eclscjedbsn601.ebs.ecomp.com"
+#####################################################
+
+#Service Name: Track & Trace
+#Repo Name:    track-and-trace-graphql-service
+track_and_trace_service_IMAGE_VERSION: "1.1.3"
+track_and_trace_service_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -DLOGGING_LEVEL=debug"
+track_and_trace_service_CATALINA_OPTS_XMS: "-Xms6G"
+track_and_trace_service_CATALINA_OPTS_XMX: "-Xmx6G"
+track_and_trace_service_SERVER_PORT: "8082"
+track_and_trace_service_LOADBALANCER_HOST: "brand-global-st1.ebs.ecomp.com:10.249.32.27"
+track_and_trace_service_TRACKING_HOST: "st1-sii-webservices.ebs.ecomp.com:10.249.32.25"
+
+#Repo Name: track-and-trace
+track_and_trace_IMAGE_VERSION: "0.20181213155812.2a20302c-RELEASE"
+track_and_trace_GRAPHQL_ENDPOINT: "http://brand-global-st1.ebs.ecomp.com:8082/aggregrator-track-trace/graphql"
+track_and_trace_APAC_MONOLITH_ROOT: "https://st1-img-apac.ebs.ecomp.com"
+track_and_trace_EMEA_MONOLITH_ROOT: "https://st1-img-emea.ebs.ecomp.com"
+track_and_trace_CONFIG_ENV: "st1"
+track_and_trace_DEBUG: "tnt*"
+track_and_trace_LOADBALANCER_HOST: "brand-global-st1.ebs.ecomp.com:10.249.32.27"
+track_and_trace_EMEA_HOST: "st1-img-emea.ebs.ecomp.com:10.249.168.11"
+track_and_trace_APAC_HOST: "st1-img-apac.ebs.ecomp.com:10.249.168.12"
+
+#Repo Name: ReSTService-OrderDetails
+order_details_service_IMAGE_VERSION: "1.0.1"
+order_details_service_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -DLOGGING_LEVEL=debug"
+order_details_service_CATALINA_OPTS_XMS: "-Xms6G"
+order_details_service_CATALINA_OPTS_XMX: "-Xmx6G"
+order_details_service_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+order_details_service_SERVER_PORT: "8083"
+order_details_service_EMEA_DATABASE_HOST: "eclscjedbsn601.ebs.ecomp.com:10.249.32.10"
+order_details_service_APAC_DATABASE_HOST: "eclscjedbsn601.ebs.ecomp.com:10.249.65.10"
+order_details_service_MIDDLEWARE_HOST: "feai-test-glesb01.ebs.ecomp.com:10.249.32.10"
+#####################################################
+
+#Service Name: Browse-Redirect
+##Repo Name:    Browse-Redirect-Mapping-Deployment
+browse_redirect_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -DCATEGORY_HIERARCHY_LOAD_FILE=/data/hierarchymapping.csv"
+browse_redirect_IMAGE_VERSION: "1.0.1"
+browse_redirect_CATALINA_OPTS_XMS: "-Xms1024m"
+browse_redirect_CATALINA_OPTS_XMX: "-Xmx1024m"
+browse_redirect_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+browse_redirect_CATEGORY_HIERARCHY_LOAD_FILE: "/data/hierarchymapping.csv"
+browse_redirect_COMMIT_SHA: "ff9224bf"
+
+#Service Name: Basket
+#Repo Name:    basket-application
+basket_application_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+basket_application_IMAGE_VERSION: "1.0.4-20181107.104849-73"
+basket_application_CATALINA_OPTS_XMS: "-Xms4096m"
+basket_application_CATALINA_OPTS_XMX: "-Xmx4096m"
+basket_application_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+basket_application_TOMCAT_MINSPARETHREADS: 25
+basket_application_TOMCAT_MAXTHREADS: 800
+
+#Repo Name:    basket-microservice
+basket_microservice_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+basket_microservice_IMAGE_VERSION: "1.0.1-20181018.134329-60"
+basket_microservice_CATALINA_OPTS_XMS: "-Xms4096m"
+basket_microservice_CATALINA_OPTS_XMX: "-Xmx4096m"
+basket_microservice_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+basket_microservice_TOMCAT_MINSPARETHREADS: 25
+basket_microservice_TOMCAT_MAXTHREADS: 800
+
+#Repo Name:    customer-part-numbers-microservice
+basket_cpn_CATALINA_PARAMS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.rmi.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+basket_cpn_IMAGE_VERSION: "1.0.0-20181101.101619-7"
+basket_cpn_CATALINA_OPTS_XMS: "-Xms4096m"
+basket_cpn_CATALINA_OPTS_XMX: "-Xmx4096m"
+basket_cpn_CATALINA_OPTS_GC1: "-XX:+UseG1GC"
+basket_cpn_TOMCAT_MINSPARETHREADS: 25
+basket_cpn_TOMCAT_MAXTHREADS: 800
+
+#Service Name: Indexable-filter-service
+##Repo Name:  indexable-filter-service 
+indexable_filter_IMAGE_VERSION: "1.0.11"
+indexable_filter_STATSD_ENABLED: "true"
+indexable_filter_CONFIG_COMMIT_SHA: "39fb7c6528109a5dd866e9ad215e870384d73128"
+######################################################
+
+#Service Name: My-Account
+jwt_auth_server_IMAGE_VERSION: "0.20181130165858.c363173c"

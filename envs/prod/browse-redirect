@@ -1,0 +1,6 @@
+[docker:children]
+browse-redirect
+
+[browse-redirect]
+ecllajsvcpn005
+ecllajsvcpn006

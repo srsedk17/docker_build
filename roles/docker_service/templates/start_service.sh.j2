@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+docker rm {{ item.name }}_{{ env_name }} || true
+
+docker run --rm --name {{ item.name }}_{{ env_name }} \
+{% if item.ports is defined %}
+{% for port in item.ports %}
+      -p {{ port }} \
+{% endfor %}
+{% endif %}
+{% if item.environment is defined %}
+{% for var in item.environment %}
+      -e {{ var.split('=')[0] }}="${{ var.split('=')[0] }}" \
+{% endfor %}
+{% endif %}
+{% if item.volumes is defined %}
+{% for vol in item.volumes %}
+      -v {{ vol }} \
+{% endfor %}
+{% endif %}
+{% if item.mem_limit is defined %}
+      --memory {{ item.mem_limit }} \
+{% endif%}
+{% if item.mem_reservation is defined %}
+      --memory-reservation {{ item.mem_reservation }} \
+{% endif%}
+{% if item.memswap_limit is defined %}
+      --memory-swap {{ item.memswap_limit }} \
+{% endif%}
+{% if item.labels is defined %}
+{% for label in item.labels %}
+      -l {{ label.name }}={{ label.value }} \
+{% endfor %}
+{% endif %}
+{% if item.ad is defined %}
+      -l com.datadoghq.ad.check.id={{ item.ad }} \
+{% endif %}
+{% if item.team is defined %}
+      -l team={{ item.team }} \
+{% endif %}
+{% if item.user is defined %}
+      -u user={{ item.user }} \
+{% endif %}
+{% if item.technology is defined %}
+      -l technology={{ item.technology }} \
+{% endif %}
+{% if item.source is defined %}
+      -l source={{ item.source }} \
+{% endif %}
+{% if item.service is defined %}
+      -l service={{ item.service }} \
+{% endif %}
+{% if item.ulimits is defined %}
+      --ulimit {{ item.ulimits }} \
+{% endif %}
+{% if item.hosts is defined %}
+{% for host in item.hosts %}
+      --add-host={{ host }} \
+{% endfor %}
+{% endif %}
+      --log-driver {{ item.log_driver | default('journald') }} \
+      --hostname {{ ansible_hostname }}-{{ item.name }} \
+      {{ item.image_name }}:{{ item.image_version }}{% if item.command is defined %} {{ item.command }}{% endif %} & > /dev/null 2>&1
+
+{% if item.networks is defined %}
+FIND=$(docker ps | grep {{ item.name }}_{{ env_name }})
+RET=$?
+COUNT=0
+while [ $RET -ne 0 ] && [ $COUNT -le 5 ]
+do
+  sleep 1
+  FIND=$(docker ps | grep {{ item.name }}_{{ env_name }})
+  RET=$?
+  COUNT=$(( COUNT + 1 ))
+done
+if [ $COUNT -eq 5 ]
+then
+  echo "Container {{ item.name }}_{{ env_name }} not up in 5 seconds"
+  exit 1
+fi
+
+{% for network in item.networks %}
+docker network connect{% if item.aliases is defined %}{% for alias in item.aliases %} --alias {{ alias }}{% endfor %}{% endif %} {{ network }} {{ item.name }}_{{ env_name }} || true
+{% endfor %}
+{% endif %}
+

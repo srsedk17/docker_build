@@ -1,0 +1,9 @@
+[Service]
+Environment=DD_HOSTNAME={{ ansible_hostname }}
+Environment=DD_AGENT_IMAGE_NAME={{ registry_host }}/admin/datadog-jmx
+Environment=DD_AGENT_IMAGE_VER={{ datadog_version }}
+Environment="DATADOG_TAGS=cluster:docker-host environment:{{ env_name }}"
+Environment=DD_API_KEY={{ datadog_api_key }}
+Environment=DD_LOG_LEVEL=WARNING
+Environment=DD_LOGS_ENABLED=true
+Environment=DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true

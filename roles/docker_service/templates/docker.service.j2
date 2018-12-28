@@ -1,0 +1,18 @@
+[Unit]
+Description={{ item.name }} container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=forking
+Restart={% if item.schedule is defined %}on-abnormal{% else %}always{% endif %}
+
+RestartSec=30
+StartLimitInterval=0
+StartLimitBurst=0
+ExecStartPre=/bin/bash -c "/bin/systemctl set-environment HOST_IP=$(/bin/hostname -i)"
+ExecStart=/bin/bash -c "start_{{ item.name }}.sh"
+ExecStop=/bin/docker stop {{ item.name }}_{{ env_name }}
+
+[Install]
+WantedBy=multi-user.target

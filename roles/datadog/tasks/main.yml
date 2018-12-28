@@ -1,0 +1,101 @@
+---
+- name: install datadog systemd unit files
+  template:
+    src: "{{item}}"
+    dest: "/etc/systemd/system/{{item}}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+  - datadog.service
+  notify:
+    - restart docker service
+
+- name: create service.d directory
+  file:
+    path: /etc/systemd/system/datadog.service.d
+    owner: root
+    group: root
+    mode: 0644
+    state: directory
+
+- name: install datadog systemd override files
+  template:
+    src: "override.conf.j2"
+    dest: "/etc/systemd/system/{{item}}.d/override.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+  - datadog.service
+  notify:
+    - restart docker service
+
+- name: install start_datadog script
+  template:
+    src: start_datadog.sh.j2
+    dest: /usr/local/bin/start_datadog.sh
+    mode: 0755
+  notify:
+    - restart docker service
+
+- name: create datadog conf directory for integrations
+  file:
+    path: /opt/datadog-agent/conf.d/{{ item }}.d
+    state: directory
+    mode: 0644
+  with_items:
+    - file
+    - docker
+    - ntp
+    - tomcat
+  notify:
+    - restart docker service
+
+- name: install datadog log configuration files
+  template:
+    src: "{{ item }}.d/conf.yaml"
+    dest: "/opt/datadog-agent/conf.d/{{ item }}.d/conf.yaml"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - docker
+    - ntp
+    - file
+  notify:
+    - restart docker service
+
+- name: install datadog log configuration file types
+  copy:
+    src: templates/file.d/conf.ctmpl
+    dest: "/opt/datadog-agent/conf.d/file.d/conf.ctmpl"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart docker service
+
+- name: install datadog tomcat autodiscovery configuration
+  template:
+    src: tomcat.d/{{ item }}
+    dest: "/opt/datadog-agent/conf.d/tomcat.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - auto_conf.yaml
+    - metrics.yaml
+  notify:
+    - restart docker service
+
+- name: create docker network
+  docker_network:
+    name: "datadog"
+    state: present
+
+- name: ensure service is running
+  service:
+    name: "datadog"
+    enabled: true
+    state: started

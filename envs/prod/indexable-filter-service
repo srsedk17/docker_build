@@ -1,0 +1,6 @@
+[docker:children]
+indexable-filter-service
+
+[indexable-filter-service]
+ecllajsvcpn003
+ecllajsvcpn004

@@ -1,0 +1,4 @@
+#jinja2: trim_blocks:False
+{% for service in services %}
+Version {{ service.image_version }} for {{ service.name }}  has been deployed 
+{% endfor %}

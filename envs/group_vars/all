@@ -1,0 +1,7 @@
+ansible_ssh_user    : ansible_user
+host_domain         : ebs.ecomp.com
+host_name           : '{{ inventory_hostname }}'
+ansible_ssh_host    : '{{ host_name }}.{{ host_domain }}'
+datadog_version     : "1.20181107162449.968d577c"
+docker_network_addr : "172.17.0.1"
+bv_db_user          : "BVUSER"

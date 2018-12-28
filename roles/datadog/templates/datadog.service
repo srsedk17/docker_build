@@ -1,0 +1,17 @@
+[Unit]
+Description=Datadog Agent container
+Requires=docker.service proc-sys-fs-binfmt_misc.mount
+After=docker.service
+
+[Service]
+Type=forking
+Restart=always
+RestartSec=30
+StartLimitInterval=0
+StartLimitBurst=0
+ExecStartPre=/bin/bash -c "/bin/systemctl set-environment HOST_IP=$(hostname -I | cut -d ' ' -f1)"
+ExecStart=/bin/bash -c "start_datadog.sh"
+ExecStop=/bin/docker stop datadog
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+logs:
+  - type: file
+    path: /host/var/log/cloud-init-output.log
+    service: cloud-init
+    source: cloud-init

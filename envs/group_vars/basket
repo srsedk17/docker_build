@@ -1,0 +1,68 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "basket"
+services:
+  - name: "{{ service_prefix }}_application"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-basket-application"
+    image_version: "{{ basket_application_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name | lower }}"
+      - "CATALINA_PARAMS={{ basket_application_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ basket_application_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ basket_application_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ basket_application_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ basket_application_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ basket_application_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 8090:8080
+    volumes:
+      - /opt/docker_logs/basket-application:/opt/mos/logs:rw
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}_application"
+  
+  - name: "{{ service_prefix }}_microservice"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-basket-microservice-service"
+    image_version: "{{ basket_microservice_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name | lower }}"
+      - "CATALINA_PARAMS={{ basket_microservice_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ basket_microservice_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ basket_microservice_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ basket_microservice_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ basket_microservice_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ basket_microservice_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 80:8080
+      - 9090:9090
+    volumes:
+      - /opt/docker_logs/basket:/opt/mos/logs:rw
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}_microservice"
+  
+  - name: "{{ service_prefix }}_cpn"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-customer-part-numbers-microservice-service"
+    image_version: "{{ basket_cpn_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name | lower }}"
+      - "CATALINA_PARAMS={{ basket_cpn_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ basket_cpn_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ basket_cpn_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ basket_cpn_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ basket_cpn_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ basket_cpn_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 81:8080
+      - 9091:9091
+    volumes:
+      - /opt/docker_logs/cpn:/opt/mos/logs:rw
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}_cpn"

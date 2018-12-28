@@ -1,0 +1,5 @@
+logs:{{ range ls "datadog/log/collect" }}
+  - type: file
+    path: {{ .Value }}
+    service: {{ .Key }}
+    source: {{ .Key }}{{ end }}

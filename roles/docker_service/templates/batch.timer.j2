@@ -1,0 +1,8 @@
+[Unit]
+Description=Run {{ item.name }}.service on a schedule
+
+[Timer]
+OnCalendar={{ item.schedule }}
+
+[Install]
+WantedBy=multi-user.target

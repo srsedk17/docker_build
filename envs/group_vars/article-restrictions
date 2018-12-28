@@ -1,0 +1,367 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "eproc"
+service_prefix: "articlerestriction"
+ar_source: "article-restrictions"
+hazelcast_nodes: "{{ groups[ar_source] | map('extract', hostvars, ['ansible_ssh_host']) | join(',') }}"
+hazelcast_list: "{{ groups[ar_source] | map('extract', hostvars, ['ansible_ssh_host']) | join(':5701,') }}:5701"
+x-defaults:
+  &common-options
+  mem_limit: 550m
+  memswap_limit: 600m
+  mem_reservation: 128m
+
+.env_default:
+  &environment-options
+  environment:
+   - "ENV={{ env_name }}"
+   - "JAVA_MEM=-Xmx200m"
+   - "LOGGING_JSON={{ ar_logging_json }}"
+   - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+   - "STATSD_HOST={{ docker_network_addr }}"
+   - "STATSD_PORT=8125"
+
+.global:
+  &global
+  team: "\"The Outlaws\""
+
+
+services:
+  - name: "{{ service_prefix }}_client"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-client"
+    image_version: "{{ ar_client_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+      - 3000:3000
+    aliases:
+      - client
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_client_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_client_security_pass }}"
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"client\"}]"'
+
+  - name: "{{ service_prefix }}_app"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-app"
+    image_version: "{{ ar_app_IMAGE_VERSION }}"
+    << : *global
+    ports:
+      - 8080:8082
+    mem_limit: 512m
+    mem_reservation: 256m
+    memswap_limit: 1024m
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx450m"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_app_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_app_security_pass }}"
+     - "CUSTOMER_SEARCH_ENDPOINT={{ ar_customer_search_endpoint_addr }}:{{ ar_customer_search_endpoint_port }}"
+     - "CUSTOMER_SEARCH_USERNAME={{ ar_customer_search_endpoint_user }}"
+     - "CUSTOMER_SEARCH_PASSWORD={{ ar_customer_search_endpoint_pass }}"
+     - "CUSTOMER_ENDPOINT=http://{{ docker_network_addr }}:8090"
+     - "CUSTOMER_USERNAME={{ ar_customer_security_user }}"
+     - "CUSTOMER_PASSWORD={{ ar_customer_security_pass }}"
+     - "RULE_ENDPOINT=http://{{ docker_network_addr }}:8091"
+     - "RULE_USERNAME={{ ar_rules_security_user }}"
+     - "RULE_PASSWORD={{ ar_rules_security_pass }}"
+     - "ARTICLE_COMPOSITION_ENDPOINT=http://{{ docker_network_addr }}:8094"
+     - "ARTICLE_COMPOSITION_USERNAME={{ ar_article_composition_security_user }}"
+     - "ARTICLE_COMPOSITION_PASSWORD={{ ar_article_composition_security_pass }}"
+     - "HIERARCHY_COMPOSITION_ENDPOINT=http://{{ docker_network_addr }}:8098"
+     - "HIERARCHY_COMPOSITION_USERNAME={{ ar_hierarchy_composition_security_user }}"
+     - "HIERARCHY_COMPOSITION_PASSWORD={{ ar_hierarchy_composition_security_pass }}"
+     - "BRAND_ENDPOINT=http://{{ docker_network_addr }}:8097"
+     - "BRAND_USERNAME={{ ar_brand_security_user }}"
+     - "BRAND_PASSWORD={{ ar_brand_security_pass }}"
+
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - app
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"app\"}]"'
+
+  - name:  "{{ service_prefix }}_article-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-article-service"
+    image_version: "{{ ar_article_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - 8093:8093
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "MONGO_URI=mongodb+srv://{{ ar_article_mongodb_user }}:{{ ar_article_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_article_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_article_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - article-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"article-service\"}]"'
+
+  - name:  "{{ service_prefix }}_rules-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-rules-service"
+    image_version: "{{ ar_rules_service_IMAGE_VERSION }}"
+    << : *global
+    ports:
+      - "8091:8091"
+    mem_limit: 512m
+    mem_reservation: 256m
+    memswap_limit: 1024m
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx450m"
+     - "MONGO_URI=mongodb+srv://{{ ar_rules_mongodb_user }}:{{ ar_rules_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_rules_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_rules_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - rules-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"rules-service\"}]"'
+
+  - name:  "{{ service_prefix }}_customer-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-customer-service"
+    image_version: "{{ ar_customer_service_IMAGE_VERSION }}"
+    << : *global
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "MONGO_URI=mongodb+srv://{{ ar_customer_mongodb_user }}:{{ ar_customer_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_customer_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_customer_security_pass }}"
+    mem_limit: 512m
+    mem_reservation: 256m
+    memswap_limit: 1024m
+    ports:
+      - "8090:8090"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - customer-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"customer-service\"}]"'
+
+  - name:  "{{ service_prefix }}_hierarchy-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-hierarchy-service"
+    image_version: "{{ ar_hierarchy_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - "8095:8095"
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "MONGO_URI=mongodb+srv://{{ ar_hierarchy_mongodb_user }}:{{ ar_hierarchy_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_hierarchy_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_hierarchy_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - hierarchy-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"hierarchy-service\"}]"'
+
+  - name:  "{{ service_prefix }}_hierarchy-composition-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-hierarchy-composition-service"
+    image_version: "{{ ar_hierarchy_composition_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - "8098:8098"
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_hierarchy_composition_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_hierarchy_composition_security_pass }}"
+     - "ARTICLE_HIERARCHY_SERVICE_ENDPOINT=http://{{ docker_network_addr }}:8095"
+     - "ARTICLE_HIERARCHY_SERVICE_USERNAME={{ ar_hierarchy_security_user }}"
+     - "ARTICLE_HIERARCHY_SERVICE_PASSWORD={{ ar_hierarchy_security_pass }}"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_ENDPOINT=http://{{ docker_network_addr }}:8091"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_USERNAME={{ ar_rules_security_user }}"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_PASSWORD={{ ar_rules_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - hierarchy-composition-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"hierarchy-composition-service\"}]"'
+
+  - name:  "{{ service_prefix }}_brand-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-brand-service"
+    image_version: "{{ ar_brand_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+      - 8097:8097
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "MONGO_URI=mongodb+srv://{{ ar_brand_mongodb_user }}:{{ ar_brand_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_brand_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_brand_security_pass }}"
+
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - brand-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"brand-service\"}]"'
+
+  - name:  "{{ service_prefix }}_service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-service"
+    image_version: "{{ ar_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - "8092:8092"
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "MONGO_URI=mongodb+srv://{{ ar_service_mongodb_user }}:{{ ar_service_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_service_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_service_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"service\"}]"'
+
+  - name:  "{{ service_prefix }}_article-composition-service"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-article-composition-service"
+    image_version: "{{ ar_article_composition_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - 8094:8094
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx200m"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_article_composition_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_article_composition_security_pass }}"
+     - "ARTICLE_SERVICE_ENDPOINT=http://{{ docker_network_addr }}:8093"
+     - "ARTICLE_SERVICE_USERNAME={{ ar_article_security_user }}"
+     - "ARTICLE_SERVICE_PASSWORD={{ ar_article_security_pass }}"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_ENDPOINT=http://{{ docker_network_addr }}:8091"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_USERNAME={{ ar_rules_security_user }}"
+     - "ARTICLE_RESTRICTION_RULES_SERVICE_PASSWORD={{ ar_rules_security_pass }}"
+    volumes:
+     - /opt/log/:/opt/logs
+    aliases:
+      - article-composition-service
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"article-composition-service\"}]"'
+
+  - name:  "{{ service_prefix }}_hierarchy-poller"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-hierarchy-poller"
+    image_version: "{{ ar_poller_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    ports:
+     - 5701:5701
+    environment:
+     - "JAVA_MEM=-Xmx250m"
+     - "LOGGING_JSON=true"
+     - "MONGO_URI=mongodb+srv://{{ ar_poller_mongodb_user }}:{{ ar_poller_mongodb_pass }}@{{ar_mongodb_host }}/admin"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "EMEA_JDBC_URL=jdbc:oracle:thin:@{{ ar_oracle_sb_server }}:1521:EITCS2"
+     - "EMEA_USERNAME={{ bv_db_user }}"
+     - "EMEA_PASSWORD={{ bv_db_pass }}"
+     - "APAC_JDBC_URL=jdbc:oracle:thin:@{{ ar_oracle_sb_server }}:1522:JITCS2"
+     - "APAC_USERNAME={{ bv_db_user }}"
+     - "APAC_PASSWORD={{ bv_db_pass }}"
+     - "HAZELCAST_MEMBERS={{ hazelcast_list }}"
+     - "HAZELCAST_GROUPNAME={{ env_name | lower }}"
+     - "HAZELCAST_GROUPPASSWORD={{ env_name | lower }}-pass"
+     - "HAZELCAST_HOST_IP={{ ansible_ssh_host }}"
+     - "HAZELCAST_PORT=5701"
+     - "APAC_POLL_INITIAL_DELAY=0"
+     - "APAC_POLL_FIXED_DELAY=7200000"
+     - "EMEA_POLL_INITIAL_DELAY=0"
+     - "EMEA_POLL_FIXED_DELAY=7200000"
+    aliases:
+      - hierarchy-poller
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"hierarchy-poller\"}]"'
+
+  - name:  "{{ service_prefix }}_batch"
+    image_name: "{{ registry_host }}/{{ registry_root }}/article-restriction-batch"
+    image_version: "{{ ar_article_restriction_batch_service_IMAGE_VERSION }}"
+    << : *common-options
+    << : *global
+    environment:
+     - "ENV={{ env_name }}"
+     - "JAVA_MEM=-Xmx400m"
+     - "MONGO_URI=mongodb+srv://{{ ar_batch_mongodb_user }}:{{ ar_batch_mongodb_pass }}@{{ ar_mongodb_host }}/admin"
+     - "LOGGING_JSON={{ ar_logging_json }}"
+     - "STATSD_ENABLED={{ ar_statsd_enabled }}"
+     - "STATSD_HOST={{ docker_network_addr }}"
+     - "STATSD_PORT=8125"
+     - "SECURITY_USERNAME={{ ar_batch_security_user }}"
+     - "SECURITY_PASSWORD={{ ar_batch_security_pass }}"
+    aliases:
+      - article-restriction-batch
+    schedule: "*-*-* 04:00:00"
+    command: "GB_1,DK_1,FR_1,IT_1,NL_1,BE_1,DE_1,AT_1,ZA_1,ES_1,IE_1,SE_1,HU_1,NO_1,SG_1,JP_1,AU_1,NZ_1,CN_1,MY_1,PH_1,HK_1"
+    labels:
+      - name: "com.datadoghq.ad.logs"
+        value: '"[{\"source\": \"{{ ar_source }}\", \"service\": \"batch\"}]"'
