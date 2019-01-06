@@ -2,4 +2,6 @@
 srs
 
 [srs]
-192.168.56.101 ansible_user=root ansible_ssh _pass=redhat
+192.168.56.101 
+[srs:vars]
+ansible_user=root ansible_ssh _pass=redhat
