@@ -6,3 +6,4 @@ srs
 [srs:vars]
 ansible_user=root ansible_ssh _pass=redhat
 env_name=static2
+ntp_host=10.248.81.123
