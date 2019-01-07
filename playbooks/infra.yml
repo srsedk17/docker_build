@@ -6,7 +6,7 @@
   become : true
   vars_files:
     - "../vars/infra.yml"
-   # - "../vars/{{ lookup('env', 'ENV')|lower }}.yml"
+   # - "../vars/static2.yml"
 
   roles:
     - datadog
