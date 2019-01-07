@@ -1,0 +1,24 @@
+registry_host: "dml.ebs.ecomp.com"
+registry_root: "admin"
+service_prefix: "article_hierarchy"
+services:
+  - name: "{{ service_prefix }}"
+    image_name: "{{ registry_host }}/{{ registry_root }}/rs-articlehierarchy-service"
+    image_version: "{{ article_hierarchy_IMAGE_VERSION }}"
+    environment:
+      - "ENVIRONMENT={{ env_name}}"
+      - "CATALINA_PARAMS={{ article_hierarchy_CATALINA_PARAMS }}"
+      - "CATALINA_OPTS_XMS={{ article_hierarchy_CATALINA_OPTS_XMS }}"
+      - "CATALINA_OPTS_XMX={{ article_hierarchy_CATALINA_OPTS_XMX }}"
+      - "CATALINA_OPTS_GC1={{ article_hierarchy_CATALINA_OPTS_GC1 }}"
+      - "TOMCAT_MINSPARETHREADS={{ article_hierarchy_TOMCAT_MINSPARETHREADS }}"
+      - "TOMCAT_MAXTHREADS={{ article_hierarchy_TOMCAT_MAXTHREADS}}"
+    ports:
+      - 80:8080
+    volumes:
+      - /opt/docker_logs/ArticleHierarchy:/opt/mos/logs
+      - /opt/docker_logs/tomcat:/usr/local/tomcat/logs:rw
+    networks:
+      - "{{ service_prefix }}"
+    aliases:
+      - "{{ service_prefix }}"
